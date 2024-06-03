@@ -1,7 +1,8 @@
 # Variables
 CROSS_COMPILER_PREFIX = aarch64-linux-gnu
 ASSEMBLY_FILE = boot.s
-C_FILE = main.c
+C_FILES = main.c uart.c gpio.c timer.c framebuffer.c
+OBJECTS = boot.o $(C_FILES:.c=.o)
 LINKER_SCRIPT = link.lds
 OUTPUT_ELF = kernel
 OUTPUT_BINARY = kernel8.img
@@ -14,12 +15,12 @@ all: $(OUTPUT_BINARY)
 boot.o: $(ASSEMBLY_FILE)
 	$(CROSS_COMPILER_PREFIX)-gcc -c $< -o $@
 
-# Compile the C file
-main.o: $(C_FILE)
+# Compile the C files
+%.o: %.c
 	$(CROSS_COMPILER_PREFIX)-gcc -std=c99 -ffreestanding -mgeneral-regs-only -c $< -o $@
 
 # Link the object files
-$(OUTPUT_ELF): boot.o main.o
+$(OUTPUT_ELF): $(OBJECTS)
 	$(CROSS_COMPILER_PREFIX)-ld -nostdlib -T $(LINKER_SCRIPT) -o $@ $^
 
 # Create the binary image
